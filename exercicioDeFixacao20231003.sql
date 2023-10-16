@@ -101,3 +101,48 @@ BEGIN
 END //
 
 SELECT atualizar_resumos();
+
+-- 04
+DELIMITER //
+CREATE FUNCTION media_livros_por_editora() 
+RETURNS DECIMAL(10, 2)
+DETERMINISTIC
+BEGIN
+    DECLARE media DECIMAL(10, 2);
+    DECLARE total_liv INT;
+    DECLARE totaledit INT;
+    DECLARE numedit INT;
+    DECLARE idedit INT;
+    DECLARE fim INT DEFAULT FALSE;
+    DECLARE Caminho_editora CURSOR FOR SELECT id FROM Editora;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET fim = TRUE;
+
+    SET total_liv = 0;
+    SET numedit = 0;
+
+    OPEN Caminho_editora;
+
+    read_loop: LOOP
+        FETCH Caminho_editora INTO idedit;
+        IF fim THEN
+            LEAVE read_loop;
+        END IF;
+
+        SELECT COUNT(*) INTO totaledit FROM Livro WHERE id_editora = idedit;
+
+        SET total_liv = total_liv + totaledit;
+        SET numedit = numedit + 1;
+    END LOOP;
+
+    CLOSE Caminho_editora;
+
+    IF numedit = 0 THEN
+        SET media = 0;
+    ELSE
+        SET media = total_liv / numedit;
+    END IF;
+
+    RETURN media;
+END //
+
+SELECT media_livros_por_editora();
