@@ -26,7 +26,7 @@ BEGIN
 
     CLOSE Caminho;
     RETURN total_liv;
-    
+
 END //
 
 SELECT tl_livros_genero('História');
@@ -67,3 +67,37 @@ BEGIN
 END //
 
 SELECT listar_livros_por_autor('Pedro', 'Alvares');
+
+-- 03
+DELIMITER //
+CREATE FUNCTION atualizar_resumos() 
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE fim INT DEFAULT FALSE;
+    DECLARE id_liv INT;
+    DECLARE resumoat VARCHAR(1000);
+    DECLARE Caminho CURSOR FOR SELECT id, resumo FROM Livro;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET fim = TRUE;
+
+    OPEN Caminho;
+
+    update_loop: LOOP
+        FETCH Caminho INTO id_liv, resumoat;
+
+        IF fim THEN
+            LEAVE update_loop;
+        END IF;
+
+        UPDATE Livro
+        SET resumo = CONCAT(resumoat, ' Este livro é excelente!!')
+        WHERE id = id_liv;
+       
+    END LOOP;
+
+    CLOSE Caminho;
+
+    RETURN 1;
+END //
+
+SELECT atualizar_resumos();
